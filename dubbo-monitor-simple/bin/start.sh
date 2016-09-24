@@ -1,5 +1,5 @@
 #!/bin/bash
-sed -e "s/{ZOOKEEPER_ADDRESS}/$ZOOKEEPER_ADDRESS/g" /dubbo-monitor-simple/conf/dubbo_origin.properties > /dubbo-monitor-simple/conf/dubbo.properties
+
 cd `dirname $0`
 BIN_DIR=`pwd`
 cd ..
@@ -13,21 +13,6 @@ LOGS_FILE=`sed '/dubbo.log4j.file/!d;s/.*=//' conf/dubbo.properties | tr -d '\r'
 
 if [ -z "$SERVER_NAME" ]; then
     SERVER_NAME=`hostname`
-fi
-
-PIDS=`ps -f | grep java | grep "$CONF_DIR" |awk '{print $2}'`
-if [ -n "$PIDS" ]; then
-    echo "ERROR: The $SERVER_NAME already started!"
-    echo "PID: $PIDS"
-    exit 1
-fi
-
-if [ -n "$SERVER_PORT" ]; then
-    SERVER_PORT_COUNT=`netstat -tln | grep $SERVER_PORT | wc -l`
-    if [ $SERVER_PORT_COUNT -gt 0 ]; then
-        echo "ERROR: The $SERVER_NAME port $SERVER_PORT already used!"
-        exit 1
-    fi
 fi
 
 LOGS_DIR=""
@@ -62,27 +47,5 @@ else
 fi
 
 echo -e "Starting the $SERVER_NAME ...\c"
-nohup java $JAVA_OPTS $JAVA_MEM_OPTS $JAVA_DEBUG_OPTS $JAVA_JMX_OPTS -classpath $CONF_DIR:$LIB_JARS com.alibaba.dubbo.container.Main > $STDOUT_FILE 2>&1 &
+java $JAVA_OPTS $JAVA_MEM_OPTS $JAVA_DEBUG_OPTS $JAVA_JMX_OPTS -classpath $CONF_DIR:$LIB_JARS com.alibaba.dubbo.container.Main
 
-COUNT=0
-while [ $COUNT -lt 1 ]; do    
-    echo -e ".\c"
-    sleep 1 
-    if [ -n "$SERVER_PORT" ]; then
-        if [ "$SERVER_PROTOCOL" == "dubbo" ]; then
-    	    COUNT=`echo status | nc -i 1 127.0.0.1 $SERVER_PORT | grep -c OK`
-        else
-            COUNT=`netstat -an | grep $SERVER_PORT | wc -l`
-        fi
-    else
-    	COUNT=`ps -f | grep java | grep "$DEPLOY_DIR" | awk '{print $2}' | wc -l`
-    fi
-    if [ $COUNT -gt 0 ]; then
-        break
-    fi
-done
-
-echo "OK!"
-PIDS=`ps -f | grep java | grep "$DEPLOY_DIR" | awk '{print $2}'`
-echo "PID: $PIDS"
-echo "STDOUT: $STDOUT_FILE"
