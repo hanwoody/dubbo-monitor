@@ -6,10 +6,10 @@ cd ..
 DEPLOY_DIR=`pwd`
 CONF_DIR=$DEPLOY_DIR/conf
 
-SERVER_NAME=`sed '/dubbo.application.name/!d;s/.*=//' conf/dubbo.properties | tr -d '\r'`
-SERVER_PROTOCOL=`sed '/dubbo.protocol.name/!d;s/.*=//' conf/dubbo.properties | tr -d '\r'`
-SERVER_PORT=`sed '/dubbo.protocol.port/!d;s/.*=//' conf/dubbo.properties | tr -d '\r'`
-LOGS_FILE=`sed '/dubbo.log4j.file/!d;s/.*=//' conf/dubbo.properties | tr -d '\r'`
+SERVER_NAME=`sed '/dubbo.application.name/!d;s/.*=//' $CONF_DIR/dubbo.properties | tr -d '\r'`
+SERVER_PROTOCOL=`sed '/dubbo.protocol.name/!d;s/.*=//' $CONF_DIR/dubbo.properties | tr -d '\r'`
+SERVER_PORT=`sed '/dubbo.protocol.port/!d;s/.*=//' $CONF_DIR/dubbo.properties | tr -d '\r'`
+LOGS_FILE=`sed '/dubbo.log4j.file/!d;s/.*=//' $CONF_DIR/dubbo.properties | tr -d '\r'`
 
 if [ -z "$SERVER_NAME" ]; then
     SERVER_NAME=`hostname`
@@ -41,9 +41,9 @@ fi
 JAVA_MEM_OPTS=""
 BITS=`java -version 2>&1 | grep -i 64-bit`
 if [ -n "$BITS" ]; then
-    JAVA_MEM_OPTS=" -server -Xmx1g -Xms1g -Xmn128m -XX:PermSize=128m -Xss256k -XX:+DisableExplicitGC -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSCompactAtFullCollection -XX:LargePageSizeInBytes=128m -XX:+UseFastAccessorMethods -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=70 "
+    JAVA_MEM_OPTS=" -server -Xmx1g -Xms1g -Xmn128m -Xss256k -XX:+DisableExplicitGC -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSCompactAtFullCollection -XX:LargePageSizeInBytes=128m -XX:+UseFastAccessorMethods -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=70 "
 else
-    JAVA_MEM_OPTS=" -server -Xms1g -Xmx1g -XX:PermSize=128m -XX:SurvivorRatio=2 -XX:+UseParallelGC "
+    JAVA_MEM_OPTS=" -server -Xms1g -Xmx1g -XX:SurvivorRatio=2 -XX:+UseParallelGC "
 fi
 
 echo -e "Starting the $SERVER_NAME ...\c"
